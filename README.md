@@ -1,10 +1,10 @@
-# Gerenciador Financeiro Pessoal
+Gerenciador Financeiro Pessoal
 
-## Integrantes
+Integrante:
 
 - Luana Maria Carvalho da Silva Hildever
 
-## Descrição do Projeto
+Descrição do Projeto
 
 Sistema para registrar receitas e despesas pessoais via terminal. O usuário pode lançar movimentações com data, categoria, valor e descrição. O programa calcula o saldo, emite alertas quando o orçamento de uma categoria é estourado, e gera um relatório com gráfico ASCII dos gastos por categoria. Os dados são salvos em arquivo CSV para persistência entre sessões.
 
