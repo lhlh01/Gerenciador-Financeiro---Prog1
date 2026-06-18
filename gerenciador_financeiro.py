@@ -1,179 +1,179 @@
 # Projeto de Programação 1 - Gerenciador Financeiro Pessoal - Luana Maria Carvalho da Silva Hildever
 
-import csv # o csv serve para ler e escrever arquivos no formato CSV (planilha de texto).
-import os # o "os" serve para interagir com o sistema operacional, como verificar se um arquivo já existe no computador
-from datetime import datetime # "datetime" serve para pegar a data e hora atual do sistema.
+import csv  # biblioteca para ler e escrever arquivos CSV
+import os # biblioteca para verificar se arquivos existem no computador
+from datetime import datetime # importa so a parte de data e hora da biblioteca
 
+ARQUIVO = "transacoes.csv"  # nome do arquivo onde os dados ficam salvos
 
-ARQUIVO = "transacoes.csv"
-
-ORCAMENTOS = {
+# dicionario com o limite de gasto mensal de cada categoria
+ORCAMENTOS = {   
     "Alimentacao": 500.00,
     "Transporte": 300.00,
     "Lazer": 200.00,
     "Contas": 1000.00
 }
 
-
-
+# verifica se o arquivo ainda nao existe
 if not os.path.exists(ARQUIVO):
-    with open(ARQUIVO, "w", newline="", encoding="utf-8") as f:
-        escritor = csv.writer(f)
-        escritor.writerow(["data", "categoria", "valor", "descricao"])
+    with open(ARQUIVO, "w", newline="", encoding="utf-8") as f: # cria o arquivo
+        escritor = csv.writer(f)  # prepara para escrever no formato CSV
+        escritor.writerow(["data", "categoria", "valor", "descricao"])  # escreve o cabecalho
 
-
+# funcao que le as transacoes
 def ler_transacoes():
-    lista = []
-    with open(ARQUIVO, "r", encoding="utf-8") as f:
-        leitor = csv.reader(f)
-        next(leitor)
-        for linha in leitor:
-            lista.append(linha)
-    return lista
+    lista = [] # lista vazia que vai guardar todas as transacoes
+    with open(ARQUIVO, "r", encoding="utf-8") as f: # abre o arquivo para leitura
+        leitor = csv.reader(f)  # prepara para ler o arquivo CSV linha por linha
+        next(leitor)  # pula a primeira linha porque ela e o cabecalho
+        for linha in leitor: # percorre cada linha do arquivo
+            lista.append(linha) # adiciona a linha na lista
+    return lista # retorna a lista com todas as transacoes
 
 
 def salvar_transacoes(lista):
-    with open(ARQUIVO, "w", newline="", encoding="utf-8") as f:
-        escritor = csv.writer(f)
-        escritor.writerow(["data", "categoria", "valor", "descricao"])
-        for linha in lista:
-            escritor.writerow(linha)
+    with open(ARQUIVO, "w", newline="", encoding="utf-8") as f:   # abre o arquivo para escrita, apagando o conteudo anterior
+        escritor = csv.writer(f)  # prepara para escrever no formato CSV
+        escritor.writerow(["data", "categoria", "valor", "descricao"]) # reescreve o cabecalho
+        for linha in lista: # percorre cada transacao da lista
+            escritor.writerow(linha) # escreve a transacao no arquivo
 
 def adicionar_despesa():
     print("\n--- Nova Despesa ---")
 
-    print("Categorias:", ", ".join(ORCAMENTOS.keys()))
-    categoria = input("Categoria: ").strip().capitalize()
+    print("Categorias:", ", ".join(ORCAMENTOS.keys()))  # mostra as categorias disponiveis
+    categoria = input("Categoria: ").strip().capitalize() # pega a categoria e coloca a primeira letra maiuscula
 
-    valor_str = input("Valor (R$): ").strip()
+    valor_str = input("Valor (R$): ").strip() # pega o valor digitado como texto
     try:
-        valor = float(valor_str)
+        valor = float(valor_str) # tenta converter o texto para numero decimal
     except:
-        print("Valor invalido!")
-        return
+        print("Valor invalido!") # se nao conseguir converter, avisa o usuario
+        return # encerra a funcao sem salvar nada
 
-    descricao = input("Descricao: ").strip()
-    data = input("Data (AAAA-MM-DD) ou Enter para hoje: ").strip()
-    if data == "":
-        data = datetime.now().strftime("%Y-%m-%d")
+    descricao = input("Descricao: ").strip() # pega a descricao da despesa
+    data = input("Data (AAAA-MM-DD) ou Enter para hoje: ").strip() # pega a data
+    if data == "":  # se o usuario nao digitou nada
+        data = datetime.now().strftime("%Y-%m-%d") # usa a data de hoje automaticamente
 
-    # verifica o orcamento se a categoria existir no dicionario
+    # so verifica o orcamento se a categoria existir no dicionario
     if categoria in ORCAMENTOS:
-        mes_atual = datetime.now().strftime("%Y-%m")
-        total_gasto = 0.0
-        for linha in ler_transacoes():
-            if linha[1] == categoria and linha[0].startswith(mes_atual):
-                total_gasto = total_gasto + float(linha[2])
+        mes_atual = datetime.now().strftime("%Y-%m")  # pega o mes atual no formato AAAA-MM
+        total_gasto = 0.0 # começa o total zerado
+        for linha in ler_transacoes(): # percorre todas as transacoes salvas
+            if linha[1] == categoria and linha[0].startswith(mes_atual):  # filtra pela categoria e mes atual
+                total_gasto = total_gasto + float(linha[2])  # soma o valor da despesa encontrada
 
-        limite = ORCAMENTOS[categoria]
-        if total_gasto + valor > limite:
+        limite = ORCAMENTOS[categoria] # pega o limite do dicionario para essa categoria
+        if total_gasto + valor > limite: # verifica se vai passar do limite
             print("\n[ALERTA] Este gasto vai estourar o orcamento de " + categoria + "!")
             print("Limite: R$ " + str(limite) + " | Ja gasto: R$ " + str(round(total_gasto, 2)))
 
-    confirmar = input("\nConfirmar? (s/n): ").strip().lower()
-    if confirmar == "s":
-        lista = ler_transacoes()
-        lista.append([data, categoria, str(valor), descricao])
-        salvar_transacoes(lista)
+    confirmar = input("\nConfirmar? (s/n): ").strip().lower() # pede confirmacao antes de salvar
+    if confirmar == "s": # so salva se o usuario confirmar
+        lista = ler_transacoes() # le as transacoes que ja existem no arquivo
+        lista.append([data, categoria, str(valor), descricao]) # adiciona a nova despesa na lista
+        salvar_transacoes(lista) # salva a lista atualizada no arquivo
         print("Despesa salva com sucesso!")
 
 def listar_e_deletar():
-    lista = ler_transacoes()
+    lista = ler_transacoes() # le todas as despesas do arquivo
 
-    if len(lista) == 0:
+    if len(lista) == 0: # verifica se a lista esta vazia
         print("\nNenhuma despesa encontrada.")
-        return
+        return # encerra a funcao se nao tiver nada para mostrar
 
     print("\n--- Lista de Despesas ---")
-    i = 0
-    while i < len(lista):
-        linha = lista[i]
-        print("[" + str(i) + "] " + linha[0] + " | " + linha[1] + " | R$ " + linha[2] + " | " + linha[3])
-        i = i + 1
+    i = 0 # comeca o contador do while em zero
+    while i < len(lista): # repete enquanto nao chegar no fim da lista
+        linha = lista[i]  # pega a despesa na posicao i
+        print("[" + str(i) + "] " + linha[0] + " | " + linha[1] + " | R$ " + linha[2] + " | " + linha[3]) # imprime a despesa
+        i = i + 1 # avanca para a proxima posicao
 
     opcao = input("\nDigite o numero para deletar ou 'n' para voltar: ").strip()
-    if opcao != "n":
+    if opcao != "n":  # so tenta deletar se o usuario nao digitou 'n'
         try:
-            idx = int(opcao)
-            if idx >= 0 and idx < len(lista):
-                removida = lista.pop(idx)
-                salvar_transacoes(lista)
-                print("Despesa removida: " + removida[3])
+            idx = int(opcao) # converte a opcao para numero inteiro
+            if idx >= 0 and idx < len(lista): # verifica se o numero existe na lista
+                removida = lista.pop(idx) # remove a despesa da lista e guarda ela na variavel
+                salvar_transacoes(lista) # salva a lista atualizada no arquivo
+                print("Despesa removida: " + removida[3]) # mostra o nome da despesa removida
             else:
-                print("Indice invalido.")
+                print("Indice invalido.") # avisa se o numero nao existe na lista
         except:
-            print("Opcao invalida.")
+            print("Opcao invalida.") # avisa se o usuario digitou algo que nao e numero
 
 
 def gerar_relatorio():
-    lista = ler_transacoes()
+    lista = ler_transacoes()  # le todas as despesas do arquivo
 
-    total_despesas = 0.0
-    gastos_por_cat = {}
+    total_despesas = 0.0 # variavel para somar todas as despesas
+    gastos_por_cat = {} # dicionario para guardar o total gasto em cada categoria
 
-    for linha in lista:
-        total_despesas = total_despesas + float(linha[2])
-        cat = linha[1]
-        if cat not in gastos_por_cat:
-            gastos_por_cat[cat] = 0.0
-        gastos_por_cat[cat] = gastos_por_cat[cat] + float(linha[2])
+    for linha in lista: # percorre cada despesa
+        total_despesas = total_despesas + float(linha[2]) # soma o valor no total geral
+        cat = linha[1]  # pega o nome da categoria dessa despesa
+        if cat not in gastos_por_cat:  # se a categoria ainda nao esta no dicionario
+            gastos_por_cat[cat] = 0.0 # cria ela com valor zero
+        gastos_por_cat[cat] = gastos_por_cat[cat] + float(linha[2]) # soma o valor na categoria
 
     # soma todos os limites do dicionario para ter o orcamento total
     total_orcamento = 0.0
-    for cat in ORCAMENTOS:
-        total_orcamento = total_orcamento + ORCAMENTOS[cat]
+    for cat in ORCAMENTOS:  # percorre cada categoria do dicionario de orcamentos
+        total_orcamento = total_orcamento + ORCAMENTOS[cat]  # soma o limite de cada categoria
 
-    saldo = total_orcamento - total_despesas
+    saldo = total_orcamento - total_despesas # calcula quanto ainda sobra do orcamento
 
     print("\n======================================")
     print("       RELATORIO FINANCEIRO GERAL     ")
     print("======================================")
-    print("Orcamento Total: R$ " + str(round(total_orcamento, 2)))
-    print("Total Despesas : R$ " + str(round(total_despesas, 2)))
-    print("Saldo Restante : R$ " + str(round(saldo, 2)))
+    print("Orcamento Total: R$ " + str(round(total_orcamento, 2))) # mostra o orcamento total
+    print("Total Despesas : R$ " + str(round(total_despesas, 2)))  # mostra o total gasto
+    print("Saldo Restante : R$ " + str(round(saldo, 2)))  # mostra quanto ainda sobra
     print("======================================")
 
-    if len(gastos_por_cat) > 0:
+    if len(gastos_por_cat) > 0: # so mostra o grafico se tiver pelo menos uma despesa
         print("\nGrafico de Gastos por Categoria:")
-        maior = 0.0
-        for cat in gastos_por_cat:
-            if gastos_por_cat[cat] > maior:
-                maior = gastos_por_cat[cat]
+        maior = 0.0 # variavel para guardar o maior gasto entre as categorias
+        for cat in gastos_por_cat: # percorre o dicionario para achar o maior valor
+            if gastos_por_cat[cat] > maior: # se o valor dessa categoria for maior que o atual maior
+                maior = gastos_por_cat[cat] # atualiza o maior
 
+        # percorre de novo para desenhar as barras
         for cat in gastos_por_cat:
-            valor_cat = gastos_por_cat[cat]
+            valor_cat = gastos_por_cat[cat] # pega o total gasto nessa categoria
             if maior > 0:
-                tamanho = int((valor_cat / maior) * 20)
+                tamanho = int((valor_cat / maior) * 20)  # calcula quantos "=" a barra vai ter (maximo 20
             else:
                 tamanho = 0
-            barra = "=" * tamanho
-            print(cat + " | " + barra + " R$ " + str(round(valor_cat, 2)))
+            barra = "=" * tamanho # cria a barra repetindo o caractere "="
+            print(cat + " | " + barra + " R$ " + str(round(valor_cat, 2))) # imprime a barra
 
     print("======================================")
 
 
-if not os.path.exists(ARQUIVO):
-    with open(ARQUIVO, "w", newline="", encoding="utf-8") as f:
+if not os.path.exists(ARQUIVO):  # verifica de novo se o arquivo existe antes de comecar o menu
+    with open(ARQUIVO, "w", newline="", encoding="utf-8") as f: # cria o arquivo se nao existir
         escritor = csv.writer(f)
-        escritor.writerow(["data", "categoria", "valor", "descricao"])
+        escritor.writerow(["data", "categoria", "valor", "descricao"])  # escreve o cabecalho
 
-while True:
+while True: # loop infinito que so para quando o usuario escolher sair
     print("\n=== GERENCIADOR FINANCEIRO PESSOAL ===")
     print("1. Adicionar Despesa")
     print("2. Ver / Remover Despesas")
     print("3. Relatorio e Grafico de Gastos")
     print("4. Sair")
 
-    opcao = input("Escolha uma opcao: ").strip()
+    opcao = input("Escolha uma opcao: ").strip()  # pega a opcao digitada e remove espacos
 
     if opcao == "1":
-        adicionar_despesa()
+        adicionar_despesa()  # chama a funcao de adicionar despesa
     elif opcao == "2":
-        listar_e_deletar()
+        listar_e_deletar() # chama a funcao de listar e deletar
     elif opcao == "3":
-        gerar_relatorio()
+        gerar_relatorio() # chama a funcao de gerar relatorio
     elif opcao == "4":
         print("\nAte logo!")
-        break
+        break # encerra o loop e finaliza o programa
     else:
-        print("Opcao invalida! Tente novamente.")
+        print("Opcao invalida! Tente novamente.") # avisa se a opcao nao existe
