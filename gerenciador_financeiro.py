@@ -27,8 +27,8 @@ if not os.path.exists(ARQUIVO):
 
 # essa funcao le o arquivo CSV e retorna todas as despesas em uma lista.
 # ela abre o arquivo no modo leitura, usa csv.reader() para percorrer
-# cada linha e vai guardando elas numa lista com append().
-# o next() pula o cabecalho para nao incluir ele nos dados.
+# cada linha e vai guardando elas numa lista com append()
+# o next() pula o cabecalho para nao incluir ele nos dados
 # no final retorna a lista completa para quem chamou a funcao
 
 # funcao que le as transacoes
