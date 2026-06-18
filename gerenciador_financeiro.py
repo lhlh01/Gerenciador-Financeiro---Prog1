@@ -1,6 +1,9 @@
-import csv
-import os
-from datetime import datetime
+# Projeto de Programação 1 - Gerenciador Financeiro Pessoal - Luana Maria Carvalho da Silva Hildever
+
+import csv # o csv serve para ler e escrever arquivos no formato CSV (planilha de texto).
+import os # o "os" serve para interagir com o sistema operacional, como verificar se um arquivo já existe no computador
+from datetime import datetime # "datetime" serve para pegar a data e hora atual do sistema.
+
 
 ARQUIVO = "transacoes.csv"
 
@@ -11,18 +14,19 @@ ORCAMENTOS = {
     "Contas": 1000.00
 }
 
-# Garante que o arquivo exista com cabecalho
+
+
 if not os.path.exists(ARQUIVO):
     with open(ARQUIVO, "w", newline="", encoding="utf-8") as f:
         escritor = csv.writer(f)
-        escritor.writerow(["data", "tipo", "categoria", "valor", "descricao"])
+        escritor.writerow(["data", "categoria", "valor", "descricao"])
 
 
 def ler_transacoes():
     lista = []
     with open(ARQUIVO, "r", encoding="utf-8") as f:
         leitor = csv.reader(f)
-        next(leitor)  # pula o cabecalho
+        next(leitor)
         for linha in leitor:
             lista.append(linha)
     return lista
@@ -31,19 +35,12 @@ def ler_transacoes():
 def salvar_transacoes(lista):
     with open(ARQUIVO, "w", newline="", encoding="utf-8") as f:
         escritor = csv.writer(f)
-        escritor.writerow(["data", "tipo", "categoria", "valor", "descricao"])
+        escritor.writerow(["data", "categoria", "valor", "descricao"])
         for linha in lista:
             escritor.writerow(linha)
 
-
-def adicionar_movimentacao():
-    print("\n--- Nova Movimentacao ---")
-
-    tipo_op = input("Tipo (1 - Receita / 2 - Despesa): ").strip()
-    if tipo_op == "1":
-        tipo = "Receita"
-    else:
-        tipo = "Despesa"
+def adicionar_despesa():
+    print("\n--- Nova Despesa ---")
 
     print("Categorias:", ", ".join(ORCAMENTOS.keys()))
     categoria = input("Categoria: ").strip().capitalize()
@@ -60,13 +57,13 @@ def adicionar_movimentacao():
     if data == "":
         data = datetime.now().strftime("%Y-%m-%d")
 
-    # Verifica orcamento se for despesa
-    if tipo == "Despesa" and categoria in ORCAMENTOS:
+    # verifica o orcamento se a categoria existir no dicionario
+    if categoria in ORCAMENTOS:
         mes_atual = datetime.now().strftime("%Y-%m")
         total_gasto = 0.0
         for linha in ler_transacoes():
-            if linha[1] == "Despesa" and linha[2] == categoria and linha[0].startswith(mes_atual):
-                total_gasto = total_gasto + float(linha[3])
+            if linha[1] == categoria and linha[0].startswith(mes_atual):
+                total_gasto = total_gasto + float(linha[2])
 
         limite = ORCAMENTOS[categoria]
         if total_gasto + valor > limite:
@@ -76,23 +73,22 @@ def adicionar_movimentacao():
     confirmar = input("\nConfirmar? (s/n): ").strip().lower()
     if confirmar == "s":
         lista = ler_transacoes()
-        lista.append([data, tipo, categoria, str(valor), descricao])
+        lista.append([data, categoria, str(valor), descricao])
         salvar_transacoes(lista)
-        print("Movimentacao salva com sucesso!")
-
+        print("Despesa salva com sucesso!")
 
 def listar_e_deletar():
     lista = ler_transacoes()
 
     if len(lista) == 0:
-        print("\nNenhuma transacao encontrada.")
+        print("\nNenhuma despesa encontrada.")
         return
 
-    print("\n--- Lista de Transacoes ---")
+    print("\n--- Lista de Despesas ---")
     i = 0
     while i < len(lista):
         linha = lista[i]
-        print("[" + str(i) + "] " + linha[0] + " | " + linha[1] + " | " + linha[2] + " | R$ " + linha[3] + " | " + linha[4])
+        print("[" + str(i) + "] " + linha[0] + " | " + linha[1] + " | R$ " + linha[2] + " | " + linha[3])
         i = i + 1
 
     opcao = input("\nDigite o numero para deletar ou 'n' para voltar: ").strip()
@@ -102,7 +98,7 @@ def listar_e_deletar():
             if idx >= 0 and idx < len(lista):
                 removida = lista.pop(idx)
                 salvar_transacoes(lista)
-                print("Transacao removida: " + removida[4])
+                print("Despesa removida: " + removida[3])
             else:
                 print("Indice invalido.")
         except:
@@ -112,28 +108,29 @@ def listar_e_deletar():
 def gerar_relatorio():
     lista = ler_transacoes()
 
-    total_receitas = 0.0
     total_despesas = 0.0
     gastos_por_cat = {}
 
     for linha in lista:
-        if linha[1] == "Receita":
-            total_receitas = total_receitas + float(linha[3])
-        else:
-            total_despesas = total_despesas + float(linha[3])
-            cat = linha[2]
-            if cat not in gastos_por_cat:
-                gastos_por_cat[cat] = 0.0
-            gastos_por_cat[cat] = gastos_por_cat[cat] + float(linha[3])
+        total_despesas = total_despesas + float(linha[2])
+        cat = linha[1]
+        if cat not in gastos_por_cat:
+            gastos_por_cat[cat] = 0.0
+        gastos_por_cat[cat] = gastos_por_cat[cat] + float(linha[2])
 
-    saldo = total_receitas - total_despesas
+    # soma todos os limites do dicionario para ter o orcamento total
+    total_orcamento = 0.0
+    for cat in ORCAMENTOS:
+        total_orcamento = total_orcamento + ORCAMENTOS[cat]
+
+    saldo = total_orcamento - total_despesas
 
     print("\n======================================")
     print("       RELATORIO FINANCEIRO GERAL     ")
     print("======================================")
-    print("Total Receitas: R$ " + str(round(total_receitas, 2)))
-    print("Total Despesas: R$ " + str(round(total_despesas, 2)))
-    print("Saldo Atual   : R$ " + str(round(saldo, 2)))
+    print("Orcamento Total: R$ " + str(round(total_orcamento, 2)))
+    print("Total Despesas : R$ " + str(round(total_despesas, 2)))
+    print("Saldo Restante : R$ " + str(round(saldo, 2)))
     print("======================================")
 
     if len(gastos_por_cat) > 0:
@@ -155,30 +152,28 @@ def gerar_relatorio():
     print("======================================")
 
 
-# --- Menu principal ---
-# Garante que o arquivo exista ao iniciar
 if not os.path.exists(ARQUIVO):
     with open(ARQUIVO, "w", newline="", encoding="utf-8") as f:
         escritor = csv.writer(f)
-        escritor.writerow(["data", "tipo", "categoria", "valor", "descricao"])
+        escritor.writerow(["data", "categoria", "valor", "descricao"])
 
 while True:
     print("\n=== GERENCIADOR FINANCEIRO PESSOAL ===")
-    print("1. Adicionar Movimentacao")
-    print("2. Ver / Remover Movimentacoes")
+    print("1. Adicionar Despesa")
+    print("2. Ver / Remover Despesas")
     print("3. Relatorio e Grafico de Gastos")
     print("4. Sair")
 
     opcao = input("Escolha uma opcao: ").strip()
 
     if opcao == "1":
-        adicionar_movimentacao()
+        adicionar_despesa()
     elif opcao == "2":
         listar_e_deletar()
     elif opcao == "3":
         gerar_relatorio()
     elif opcao == "4":
-        print("\nAte logo! Mantenha suas financas sob controle.")
+        print("\nAte logo!")
         break
     else:
         print("Opcao invalida! Tente novamente.")
