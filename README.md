@@ -6,7 +6,7 @@ Luana Maria Carvalho da Silva Hildever
 
 Descrição do Projeto
 
-Sistema para registrar receitas e despesas pessoais via terminal. O usuário pode lançar movimentações com data, categoria, valor e descrição. O programa calcula o saldo, emite alertas quando o orçamento de uma categoria é estourado, e gera um relatório com gráfico ASCII dos gastos por categoria. Os dados são salvos em arquivo CSV para persistência entre sessões.
+Sistema para registrar receitas e despesas pessoais via terminal. O usuário pode lançar movimentações com data, categoria, valor e descrição. O programa calcula o saldo, emite alertas quando o orçamento de uma categoria é estourado, e gera um relatório dos gastos por categoria. Os dados são salvos em arquivo CSV.
 
 Instruções de Execução
 
@@ -31,11 +31,11 @@ Funcionalidades
 - Adicionar receitas e despesas com data, categoria, valor e descrição
 - Alerta automático ao estourar o orçamento mensal de uma categoria
 - Listar e remover transações registradas
-- Relatório geral com total de receitas, despesas, saldo e gráfico ASCII por categoria
-- Dados salvos em "transacoes.csv" para persistência
+- Relatório geral com total de receitas, despesas e saldo
+- Dados salvos em "transacoes.csv" 
 
 Divisão de Responsabilidade
 
-A integrante Luana Maria Carvalho da Silva Hildever (eu), desenvolveu o projeto por completo (estrutura do código, leitura/escrita em CSV, lógica de orçamento, relatório e gráfico ASCII)
+A integrante Luana Maria Carvalho da Silva Hildever (eu), desenvolveu o projeto por completo (estrutura do código, leitura/escrita em CSV, lógica de orçamento, relatório e etc)
 
 Obs: Os valores incluidos no financeiro são meramente ilustrativos, servindo apenas para exemplificar o funcionamento do gerenciador.
