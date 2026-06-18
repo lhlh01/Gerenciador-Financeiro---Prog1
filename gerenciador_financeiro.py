@@ -14,11 +14,22 @@ ORCAMENTOS = {
     "Contas": 1000.00
 }
 
+# esse bloco cria o arquivo CSV caso ele ainda nao exista.
+# ele usa os.path.exists() para verificar se o arquivo ja foi criado antes.
+# se nao existir, abre o arquivo no modo escrita e usa csv.writer()
+# para escrever a primeira linha com os nomes das colunas (cabecalho)
+
 # verifica se o arquivo ainda nao existe
 if not os.path.exists(ARQUIVO):
     with open(ARQUIVO, "w", newline="", encoding="utf-8") as f: # cria o arquivo
         escritor = csv.writer(f)  # prepara para escrever no formato CSV
         escritor.writerow(["data", "categoria", "valor", "descricao"])  # escreve o cabecalho
+
+# essa funcao le o arquivo CSV e retorna todas as despesas em uma lista.
+# ela abre o arquivo no modo leitura, usa csv.reader() para percorrer
+# cada linha e vai guardando elas numa lista com append().
+# o next() pula o cabecalho para nao incluir ele nos dados.
+# no final retorna a lista completa para quem chamou a funcao
 
 # funcao que le as transacoes
 def ler_transacoes():
@@ -31,6 +42,10 @@ def ler_transacoes():
     return lista # retorna a lista com todas as transacoes
 
 
+# essa funcao recebe uma lista de despesas e salva ela no arquivo CSV.
+# ela abre o arquivo no modo escrita, o que apaga tudo que tinha antes,
+# reescreve o cabecalho e depois usa um for para escrever
+# cada despesa da lista no arquivo linha por linha
 def salvar_transacoes(lista):
     with open(ARQUIVO, "w", newline="", encoding="utf-8") as f:   # abre o arquivo para escrita, apagando o conteudo anterior
         escritor = csv.writer(f)  # prepara para escrever no formato CSV
@@ -38,6 +53,14 @@ def salvar_transacoes(lista):
         for linha in lista: # percorre cada transacao da lista
             escritor.writerow(linha) # escreve a transacao no arquivo
 
+
+# essa funcao e responsavel por registrar uma nova despesa.
+# ela pede ao usuario a categoria, o valor, a descricao e a data.
+# usa try/except para evitar que o programa trave se o usuario
+# digitar um valor invalido. antes de salvar, verifica se o gasto
+# vai estourar o orcamento da categoria no mes atual somando
+# todas as despesas da mesma categoria com um for.
+# so salva a despesa se o usuario confirmar com "s"
 def adicionar_despesa():
     print("\n--- Nova Despesa ---")
 
@@ -76,6 +99,13 @@ def adicionar_despesa():
         salvar_transacoes(lista) # salva a lista atualizada no arquivo
         print("Despesa salva com sucesso!")
 
+
+# essa funcao lista todas as despesas salvas e permite deletar uma delas.
+# ela le as despesas com ler_transacoes() e usa um while para imprimir
+# cada uma com seu numero na frente. depois pergunta se o usuario quer
+# deletar alguma. se sim, usa pop() para remover da lista pelo indice
+# e salva a lista atualizada no arquivo. usa try/except para evitar
+# erro caso o usuario digite algo que nao seja numero
 def listar_e_deletar():
     lista = ler_transacoes() # le todas as despesas do arquivo
 
@@ -104,6 +134,14 @@ def listar_e_deletar():
             print("Opcao invalida.") # avisa se o usuario digitou algo que nao e numero
 
 
+# essa funcao gera um relatorio com o resumo financeiro do usuario.
+# ela percorre todas as despesas com um for, somando o total gasto
+# e agrupando os valores por categoria num dicionario.
+# depois soma todos os limites do dicionario ORCAMENTOS para calcular
+# o orcamento total e subtrai as despesas para obter o saldo restante.
+# por fim, desenha um grafico de barras em ASCII onde o tamanho de cada
+# barra e proporcional ao maior gasto entre as categorias, usando
+# o operador * para repetir o caractere "=" e formar a barra
 def gerar_relatorio():
     lista = ler_transacoes()  # le todas as despesas do arquivo
 
@@ -151,7 +189,11 @@ def gerar_relatorio():
 
     print("======================================")
 
-
+# esse bloco e o menu principal do programa. ele usa um while True para
+# ficar mostrando as opcoes repetidamente ate o usuario escolher sair.
+# usa if/elif/else para identificar qual opcao foi digitada e chamar
+# a funcao correspondente. o break na opcao 4 encerra o loop e finaliza
+# o programa
 if not os.path.exists(ARQUIVO):  # verifica de novo se o arquivo existe antes de comecar o menu
     with open(ARQUIVO, "w", newline="", encoding="utf-8") as f: # cria o arquivo se nao existir
         escritor = csv.writer(f)
